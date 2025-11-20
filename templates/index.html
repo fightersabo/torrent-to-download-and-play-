@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Torrent Hub</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="branding">
+        <div class="dot"></div>
+        <div>
+          <p class="eyebrow">Media Downloader</p>
+          <h1>Torrent Hub</h1>
+        </div>
+      </div>
+      <div class="connection-hint">
+        <p>Connected to Transmission at <strong>{{ request.host }}</strong></p>
+        <small>Configure via TRANSMISSION_* env vars.</small>
+      </div>
+    </header>
+
+    {% if error %}
+      <div class="alert error">{{ error }}</div>
+    {% endif %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <main class="layout">
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Add new torrent</p>
+            <h2>Magnet or file</h2>
+          </div>
+        </div>
+        <div class="grid two-columns">
+          <form action="{{ url_for('add_magnet') }}" method="post" class="card form-card">
+            <label for="magnet">Magnet link</label>
+            <input type="url" id="magnet" name="magnet" placeholder="magnet:?xt=urn:btih:..." required>
+            <button type="submit">Add magnet</button>
+          </form>
+
+          <form action="{{ url_for('add_file') }}" method="post" enctype="multipart/form-data" class="card form-card">
+            <label for="torrent_file">Torrent file</label>
+            <input type="file" id="torrent_file" name="torrent_file" accept=".torrent" required>
+            <button type="submit">Upload .torrent</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Library</p>
+            <h2>Active torrents</h2>
+          </div>
+          <span class="pill">{{ torrents|length }} torrents</span>
+        </div>
+        {% if torrents %}
+          <div class="grid">
+            {% for torrent in torrents %}
+              <article class="card">
+                <div class="card-top">
+                  <div>
+                    <p class="eyebrow">{{ torrent.status|capitalize }}</p>
+                    <h3>{{ torrent.name }}</h3>
+                  </div>
+                  <div class="progress">
+                    <div class="progress-bar" style="width: {{ torrent.progress }}%"></div>
+                  </div>
+                  <p class="muted">{{ torrent.progress }}% • {{ torrent.download_dir }}</p>
+                </div>
+                {% if torrent.video_files %}
+                  <div class="file-list">
+                    {% for file in torrent.video_files %}
+                      <div class="file-row">
+                        <div>
+                          <p class="file-name">{{ file.name }}</p>
+                          <p class="muted">{{ (file.completed / 1024 / 1024) | round(1) }} MB of {{ (file.size / 1024 / 1024) | round(1) }} MB</p>
+                        </div>
+                        <div class="actions">
+                          <a class="button ghost" href="{{ url_for('download_file', torrent_id=torrent.id, file_index=file.index) }}">Download</a>
+                          <a class="button" href="{{ url_for('watch', torrent_id=torrent.id, file_index=file.index) }}">Stream</a>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <p class="muted">No video files detected yet.</p>
+                {% endif %}
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <p class="eyebrow">Nothing here yet</p>
+            <h3>Queue a torrent to start downloading</h3>
+            <p class="muted">Use a magnet link or upload a .torrent file to begin.</p>
+          </div>
+        {% endif %}
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Stream {{ file_entry.name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="branding">
+        <div class="dot"></div>
+        <div>
+          <p class="eyebrow">Streaming</p>
+          <h1>{{ torrent.name }}</h1>
+        </div>
+      </div>
+      <div class="connection-hint">
+        <p><a href="{{ url_for('index') }}" class="link">Back to library</a></p>
+      </div>
+    </header>
+
+    <main class="layout single">
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Now Playing</p>
+            <h2>{{ file_entry.name }}</h2>
+          </div>
+          <span class="pill">{{ (file_entry.size / 1024 / 1024) | round(1) }} MB</span>
+        </div>
+        <div class="video-wrapper">
+          <video controls preload="metadata" crossorigin="anonymous">
+            <source src="{{ stream_url }}" type="{{ stream_mime }}">
+            {% if subtitle_available %}
+              <track src="{{ subtitle_available }}" kind="subtitles" srclang="en" label="Subtitles" default>
+            {% endif %}
+            Your browser does not support the video tag.
+          </video>
+        </div>
+        <div class="actions end">
+          <a class="button ghost" href="{{ stream_url }}" download>Direct download</a>
+          <a class="button" href="{{ url_for('download_file', torrent_id=torrent.id, file_index=file_index) }}">Download via browser</a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
