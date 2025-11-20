@@ -20,6 +20,18 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+## One-command setup
+- **Ubuntu 24.04**: installs Transmission, sets RPC to 0.0.0.0:9091 with basic auth, creates `.env.local`, and starts the app
+  ```bash
+  git clone <your-fork-url> torrent-hub && cd torrent-hub && bash scripts/ubuntu-one-click.sh
+  ```
+  Override credentials/paths by exporting `TRANSMISSION_USERNAME`, `TRANSMISSION_PASSWORD`, `TRANSMISSION_DOWNLOAD_DIR`, or `APP_SECRET_KEY` before running.
+
+- **Windows 10/11 (PowerShell)**: installs Transmission via winget, sets up Python env + `.env.local`, then starts the app (Transmission remote access must be enabled in Preferences → Remote)
+  ```powershell
+  git clone <your-fork-url> torrent-hub; cd torrent-hub; powershell -ExecutionPolicy Bypass -File scripts\windows-one-click.ps1
+  ```
+
 ## Running the app
 Set environment variables to point to your Transmission server:
 ```bash
