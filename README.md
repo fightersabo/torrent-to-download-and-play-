@@ -37,6 +37,50 @@ python app.py
 ```
 Visit `http://localhost:5000` to add torrents and stream/download videos.
 
+## Setting up a Transmission server
+The app expects a running Transmission daemon with RPC enabled.
+
+### Ubuntu 24.04
+1. Install and enable the daemon:
+   ```bash
+   sudo apt update
+   sudo apt install transmission-daemon
+   ```
+2. Stop the service before editing settings:
+   ```bash
+   sudo systemctl stop transmission-daemon
+   ```
+3. Edit `/etc/transmission-daemon/settings.json` and set:
+   - `"rpc-enabled": true`
+   - `"rpc-bind-address": "0.0.0.0"` (or keep `127.0.0.1` if the app runs on the same machine)
+   - `"rpc-port": 9091` (default)
+   - `"rpc-username"` and `"rpc-password"` to secure access
+   - `"download-dir"` to the folder the web app should serve from
+   - Optionally disable the whitelist or add the web server IP in `"rpc-whitelist"`
+4. Start the service again:
+   ```bash
+   sudo systemctl start transmission-daemon
+   ```
+5. Verify RPC is reachable:
+   ```bash
+   curl http://<server-ip>:9091/transmission/rpc
+   ```
+
+### Windows
+1. Download and install Transmission from [https://transmissionbt.com/download](https://transmissionbt.com/download).
+2. Open **Edit → Preferences → Remote** and enable **Allow remote access**.
+3. Keep the RPC port at `9091` (or note the custom port) and set a **Username/Password**.
+4. Set the **Download to** directory to the folder you want the web app to stream from.
+5. Allow Transmission through Windows Firewall and ensure the app can reach the host on the configured port.
+6. Confirm RPC is reachable by visiting `http://127.0.0.1:9091/transmission/rpc` (or replace with your host/IP).
+
+## Linking Transmission to the web app
+- Set `TRANSMISSION_HOST` to the IP/hostname where Transmission runs. If the daemon is on the same machine, use `localhost`.
+- Set `TRANSMISSION_PORT` to match the RPC port (default `9091`).
+- Provide `TRANSMISSION_USERNAME` and `TRANSMISSION_PASSWORD` if RPC auth is enabled.
+- Point `TRANSMISSION_DOWNLOAD_DIR` at the same download directory configured in Transmission to allow streaming and downloads.
+- Ensure the web server can reach the RPC port (9091) over the network or through firewall rules.
+
 ## Notes
 - Streaming uses the detected file path reported by Transmission. Ensure `TRANSMISSION_DOWNLOAD_DIR` matches your daemon configuration.
 - Subtitles are served when a `.srt` or `.vtt` with the same base filename exists alongside the video file.
